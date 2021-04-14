@@ -1,6 +1,13 @@
 const React = require("react");
 const ReactDom = require("react-dom");
+const { default: NumberBaseball } = require("./components/NumberBaseball");
 
-const WordRelay = require("./WordRelay");
+const WordRelay = require("./components/WordRelay");
 
-ReactDom.render(<WordRelay />, document.querySelector("#root"));
+ReactDom.render(
+  <>
+    <WordRelay />
+    <NumberBaseball />
+  </>,
+  document.querySelector("#root")
+);
