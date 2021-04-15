@@ -1,6 +1,7 @@
-import React from "react";
+import React, { memo } from "react";
 
 const Try = ({ tryInfo }) => {
+  console.log("render");
   return (
     <li>
       <div>{tryInfo.try}</div>
@@ -9,4 +10,4 @@ const Try = ({ tryInfo }) => {
   );
 };
 
-export default Try;
+export default memo(Try);
