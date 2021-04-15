@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useRef } from "react";
 import Try from "./Try";
 
 function getNumbers() {
@@ -19,6 +19,7 @@ const NumberBaseball = () => {
 
   const onChangeInput = (e) => {
     setValue(e.target.value);
+    inputRef.current.focus();
   };
 
   const onSubmitForm = (e) => {
@@ -62,11 +63,18 @@ const NumberBaseball = () => {
     }
   };
 
+  const inputRef = useRef();
+
   return (
     <>
       <h1>{result}</h1>
       <form onSubmit={onSubmitForm}>
-        <input maxLength={4} value={value} onChange={onChangeInput} />
+        <input
+          maxLength={4}
+          value={value}
+          onChange={onChangeInput}
+          ref={inputRef}
+        />
       </form>
       <div>시도: {tries.length}</div>
       <ul>
