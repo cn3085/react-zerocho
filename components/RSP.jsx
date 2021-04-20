@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 
 const rspCoords = {
   바위: "0",
@@ -18,106 +18,83 @@ const computerChoice = (imgCoord) => {
 //클래스의 경우: constructor -> render -> ref 설정 -> componentDidMount(비동기 요청: ajax, setInterval...)
 //               -> (setState/props) -> shouldComponentUpdate -> render -> componentDidUpdate ->
 //               -> componentWillUnmount(비동기 요청 제거: clearInterval...) -> 소멸
-class RSP extends Component {
-  state = {
-    result: "",
-    imgCoord: "0",
-    score: 0,
-  };
 
-  interval;
-  timeout;
+const RSP = () => {
+  const [result, setResult] = useState("");
+  const [imgCoord, setImgCoord] = useState(rspCoords.바위);
+  const [score, setScore] = useState(0);
 
-  componentDidMount() {
-    //컴포넌트가 처음 렌더링 된 후
-    this.interval = setInterval(this.changeHand, 1000);
-  }
+  const interval = useRef();
+  const timeout = useRef();
 
-  componentDidUpdate() {
-    //리렌더링 후
-  }
+  useEffect(() => {
+    //componentDidMount, componentDidUpdate 역할
+    interval.current = setInterval(changeHand, 100);
+    return () => {
+      //componentWillUnmount 역할
+      clearInterval(interval.current);
+    };
+  }, [imgCoord]); //바뀌고 싶은 값을 배열에 넣어준다. 여기 넣은 값들이 바뀔 때 useEffect가 실행된다. 바뀌고 싶은 값을 여기 안 넣어주면 최초 한번만 실행된다
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-    // 컴포넌트가 제거되기 직전
-  }
+  useEffect(() => {
+    return () => {};
+  }, [score]); //이런식으로 state마다 다른 effect가 필요할 때 이렇게 할 수 있음
 
-  onClickBtn = (choice) => () => {
-    const { imgCoord } = this.state;
-    clearInterval(this.interval);
+  const onClickBtn = (choice) => () => {
+    clearInterval(interval.current);
     const myScore = scores[choice];
     const cpuScore = scores[computerChoice(imgCoord)];
     const diff = myScore - cpuScore;
     if (diff === 0) {
-      this.setState({
-        result: "비겼습니다.",
-      });
+      setResult("비겼습니다.");
     } else if ([-1, 2].includes(diff)) {
-      this.setState((prevState) => {
-        return {
-          result: "이겼습니다!",
-          score: prevState.score + 1,
-        };
-      });
+      setResult("이겼습니다!");
+      setScore((prevScore) => prevScore + 1);
     } else {
-      this.setState((prevState) => {
-        return {
-          result: "졌습니다.",
-          score: prevState.score - 1,
-        };
-      });
+      setResult("졌습니다.");
+      setScore((prevScore) => prevScore - 1);
     }
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => {
-      this.interval = setInterval(this.changeHand, 1000);
-    }, 2000);
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => {
+      interval.current = setInterval(changeHand, 1000);
+    }, 1000);
   };
 
-  changeHand = () => {
-    const { imgCoord } = this.state;
+  const changeHand = () => {
     if (imgCoord === rspCoords.바위) {
-      this.setState({
-        imgCoord: rspCoords.가위,
-      });
+      setImgCoord(rspCoords.가위);
     } else if (imgCoord === rspCoords.가위) {
-      this.setState({
-        imgCoord: rspCoords.보,
-      });
+      setImgCoord(rspCoords.보);
     } else if (imgCoord === rspCoords.보) {
-      this.setState({
-        imgCoord: rspCoords.바위,
-      });
+      setImgCoord(rspCoords.바위);
     }
   };
 
-  render() {
-    const { result, imgCoord, score } = this.state;
-    return (
-      <>
-        <div
-          id="computer"
-          style={{
-            width: "142px",
-            height: "200px",
-            background: `url(https://en.pimg.jp/023/182/267/1/23182267.jpg) ${imgCoord} 0`,
-          }}
-        ></div>
-        <div>
-          <button id="" className="" onClick={this.onClickBtn("바위")}>
-            바위
-          </button>
-          <button id="" className="" onClick={this.onClickBtn("가위")}>
-            가위
-          </button>
-          <button id="" className="" onClick={this.onClickBtn("보")}>
-            보
-          </button>
-        </div>
-        <div>{result}</div>
-        <div>현재 {score} 점</div>
-      </>
-    );
-  }
-}
+  return (
+    <>
+      <div
+        id="computer"
+        style={{
+          width: "142px",
+          height: "200px",
+          background: `url(https://en.pimg.jp/023/182/267/1/23182267.jpg) ${imgCoord} 0`,
+        }}
+      ></div>
+      <div>
+        <button id="" className="" onClick={onClickBtn("바위")}>
+          바위
+        </button>
+        <button id="" className="" onClick={onClickBtn("가위")}>
+          가위
+        </button>
+        <button id="" className="" onClick={onClickBtn("보")}>
+          보
+        </button>
+      </div>
+      <div>{result}</div>
+      <div>현재 {score} 점</div>
+    </>
+  );
+};
 
-export default RSP;
+export default memo(RSP); //memo로 감싸줘야 부모자식간 불필요한 렌더링을 막을 수 있다
