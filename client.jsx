@@ -5,6 +5,7 @@ const { default: NumberBaseball } = require("./components/NumberBaseball");
 const WordRelay = require("./components/WordRelay");
 import ResponseCheck from "./components/ResponseCheck";
 import RSP from "./components/RSP";
+import Lotto from "./components/Lotto";
 
 ReactDom.render(
   <>
@@ -12,6 +13,7 @@ ReactDom.render(
     <NumberBaseball />
     <ResponseCheck />
     <RSP />
+    <Lotto />
   </>,
   document.querySelector("#root")
 );
